@@ -1,0 +1,8 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "~6.0",
+        "fabpot/goutte": "*",
+        "scholarslab/bagit": "~0.2",
+        "ralouphie/mimey": "*"
+    }
+}
