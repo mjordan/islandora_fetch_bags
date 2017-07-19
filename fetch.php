@@ -12,29 +12,26 @@ if (file_exists(trim($argv[1]))) {
 
 $temp_dir = $config['general']['temp_dir'];
 $output_dir = $config['general']['output_dir'];
-$islandora_base_url = $config['general']['islandora_base_url'];
-$solr_query = $config['objects']['solr_query'];
-$solr_url = $islandora_base_url . '/islandora/rest/v1/solr/' . $solr_query;
+$islandora_base_url = rtrim($config['general']['islandora_base_url'], '/');
 
-// Get the results of the Solr query.
-$client = new GuzzleHttp\Client();
-$solr_response = $client->request('GET', $solr_url, [
-       'headers' => [
-            'Accept' => 'application/json',
-            // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
-        ]
-]);
-
-$solr_response_body = $solr_response->getBody();
-$solr_results = json_decode($solr_response_body);
-$docs = $solr_results->response->docs;
-
-$count = count($docs);
-print "Retrieved $count object PIDs, starting to fetch content files and generate Bags.\n";
+$pids = array();
+if (isset($config['objects']['solr_query'])) {
+    $solr_query = $config['objects']['solr_query'];
+    $pids = get_pids_from_solr($islandora_base_url, $solr_query);
+}
+if (isset($config['objects']['pid_file'])) {
+    $pid_file = $config['objects']['pid_file'];
+    $pids = get_pids_from_file($pid_file);
+}
 
 // Assemble each object URL and fetch datastream content.
-foreach ($docs as $doc) {
-    describe_object($doc->PID, $islandora_base_url);
+if (count($pids) == 0) {
+    print "No objects to generate Bags for, exiting.\n";
+    exit;
+}
+
+foreach ($pids as $pid) {
+    describe_object($pid, $islandora_base_url);
 }
 
 /**
@@ -104,6 +101,11 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
  *
  * @param string $pid
  *   The object's PID.
+ * @param string $bag_temp_dir
+ *   The object-level temporary directory where
+ *   fetched datastream files have been saved.
+ * @param array $files
+ *   Array of file paths to the saved files.
  */
 function generate_bag($pid, $bag_temp_dir, $files) {
     global $output_dir;
@@ -153,6 +155,44 @@ function cleanup_temp_files($dir) {
 }
 
 /**
+ * Returns a list of PIDs from Solr.
+ *
+ * Not used yet.
+ *
+ * @param string $islandora_base_url
+ *   The target Islandora instance's base URL.
+ * @param string $solr_query
+ *   The query for retrieving PIDs.
+ *
+ * @return array
+ *   A list of PIDs.
+ */
+function get_pids_from_solr($islandora_base_url, $solr_query) {
+    $pids = array();
+    $solr_url = $islandora_base_url . '/islandora/rest/v1/solr/' . $solr_query;
+
+    $client = new GuzzleHttp\Client();
+    $solr_response = $client->request('GET', $solr_url, [
+           'headers' => [
+                'Accept' => 'application/json',
+                // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
+            ]
+    ]);
+
+    $solr_response_body = $solr_response->getBody();
+    $solr_results = json_decode($solr_response_body);
+    $docs = $solr_results->response->docs;
+
+    $count = count($docs);
+    print "Retrieved $count object PIDs from Solr, starting to fetch content files and generate Bags.\n";
+
+    foreach ($docs as $doc) {
+        $pids[] = $doc->PID;
+    }
+    return $pids;
+}
+
+/**
  * Returns a list of PIDs from a PID file.
  *
  * Not used yet.
@@ -163,7 +203,7 @@ function cleanup_temp_files($dir) {
  * @return array
  *   A list of PIDs.
  */
-function read_pid_file($pid_file_path) {
+function get_pids_from_file($pid_file_path) {
     $pids = array();
     $lines = file($pid_file_path);
     foreach ($lines as $pid) {
@@ -173,5 +213,7 @@ function read_pid_file($pid_file_path) {
             $pids[] = $pid;
         }
     }
+    $count = count($pids);
+    print "Retrieved $count object PIDs from $pid_file_path, starting to fetch content files and generate Bags.\n";
     return $pids;
 }

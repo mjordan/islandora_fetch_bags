@@ -22,7 +22,7 @@ The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) mod
 
 This script:
 
-1. Queries Solr for the PIDs for all objects to generate Bags for, and for each object:
+1. Queries Solr for the PIDs for all objects to generate Bags for (or optionally reads PIDs from a file), and for each object:
 1. Makes a request to Islandora's REST interface to get a list of the object's datastreams
 1. Fetches each datastream's content file
 1. Generates a Bag containing all of the object's content files.
@@ -45,11 +45,16 @@ temp_dir = '/tmp/fetchbags';
 islandora_base_url = 'http://digital.lib.sfu.ca';
 
 [objects]
-; Solr query used to retrieve the PIDs of objects you want to create Bags for. The one
-; in this sample queries for objects whose namespace is 'hiv', with a limit of 20.
+; 'solr_query' is used to retrieve the PIDs of objects you want to create Bags for. The
+; one in this sample queries for objects whose namespace is 'hiv', with a limit of 20.
 ; If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
-: a ridiculously high value like 1000000.
+; a ridiculously high value like 1000000.
 solr_query = "PID:hiv\:*?fl=PID&rows=20"
+
+; 'pid_file' is the full path to to a file listing one PID per row. // and # can
+; be used to comment out lines. Note that 'pid_file' and 'solr_query' are
+; mutually exclusive.
+; pid_file = "/tmp/create_bags_for_these_pids.txt'
 
 [bag-info]
 ; Tags defined in this section are added to the bag-info.txt file in each Bag.
@@ -73,7 +78,7 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 
 ## To do
 
-* Provide option to read PIDs from an input file instead of from a Solr query.
+* Provide more user control over contents of bag-info.txt (maybe via plugins?).
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
 * Add plugins to allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML) or to fetch books or newspaper issues.
 * Add proper error handling and logging.
