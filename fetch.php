@@ -4,15 +4,15 @@ require_once 'vendor/autoload.php';
 require 'vendor/scholarslab/bagit/lib/bagit.php';
 
 if (file_exists(trim($argv[1]))) {
-    $config = parse_ini_file(trim($argv[1]));
+    $config = parse_ini_file(trim($argv[1]), true);
 } else {
     print "Cannot find configuration file " . trim($argv[1]) . "\n";
     exit;
 }
 
-$output_dir = $config['output_dir'];
-$islandora_base_url = $config['islandora_base_url'];
-$solr_query = $config['solr_query'];
+$output_dir = $config['general']['output_dir'];
+$islandora_base_url = $config['general']['islandora_base_url'];
+$solr_query = $config['objects']['solr_query'];
 $solr_url = $islandora_base_url . '/islandora/rest/v1/solr/' . $solr_query;
 
 // Get the results of the Solr query.
@@ -69,7 +69,7 @@ function describe_object($pid, $islandora_base_url) {
  *   The site's base URL.
  */
 function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
-  global $output_dir;
+    global $output_dir;
 
     // Add some custom mimetype -> extension mappings.
     $builder = \Mimey\MimeMappingBuilder::create();
@@ -107,14 +107,20 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
 function generate_bag($pid, $dir, $files) {
     global $output_dir;
     global $islandora_base_url;
+    global $config;
     // @todo: PIDs can contain _, so we need to fix this.
     $pid_with_colon = preg_replace('/_/', ':', $pid);
     $object_url = $islandora_base_url . '/islandora/object/' . $pid_with_colon;
+
     $bag_info = array(
       'Internal-Sender-Identifier' => $object_url,
-      'External-Description' => 'A simple Bag containing datastreams exported from ' . $pid_with_colon . '.',
       'Bagging-Date ' => date("Y-m-d"),
     );
+
+    foreach ($config['bag-info']['tags'] as $bag_info_tag) {
+        list($tag, $value) = explode(':', $bag_info_tag);
+        $bag_info[$tag] = trim($value);
+    }
 
     $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $pid, true, true, true, $bag_info);
     foreach ($files as $file) {
