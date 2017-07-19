@@ -34,7 +34,12 @@ To use it, create an .ini file like this one:
 
 [general]
 ; Where you want your Bags to be saved. Must exist.
-output_dir = '/tmp/fetchbags';
+output_dir = '/tmp/marksbags'
+
+; Directory for saving fetched files temporarily. Must exist.
+; Important: Always use a specific directory for 'temp_dir'
+; (and not '/tmp') since its contents are deleted after Bags are created.
+temp_dir = '/tmp/fetchbags';
 
 ; Your site's base URL.
 islandora_base_url = 'http://digital.lib.sfu.ca';

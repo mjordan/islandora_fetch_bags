@@ -10,6 +10,7 @@ if (file_exists(trim($argv[1]))) {
     exit;
 }
 
+$temp_dir = $config['general']['temp_dir'];
 $output_dir = $config['general']['output_dir'];
 $islandora_base_url = $config['general']['islandora_base_url'];
 $solr_query = $config['objects']['solr_query'];
@@ -69,7 +70,7 @@ function describe_object($pid, $islandora_base_url) {
  *   The site's base URL.
  */
 function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
-    global $output_dir;
+    global $temp_dir;
 
     // Add some custom mimetype -> extension mappings.
     $builder = \Mimey\MimeMappingBuilder::create();
@@ -78,8 +79,8 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
     $mimes = new \Mimey\MimeTypes($builder->getMapping());
 
     $pid = preg_replace('/:/', '_', $raw_pid);
-    $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
-    @mkdir($bag_output_dir);
+    $bag_temp_dir = $temp_dir . DIRECTORY_SEPARATOR . $pid;
+    @mkdir($bag_temp_dir);
     $client = new GuzzleHttp\Client();
     $data_files = array();
     foreach ($datastreams as $ds) {
@@ -91,11 +92,11 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
         ]);
 
         $mimeTypes = $mimes->getAllExtensions($ds->mimeType);
-        $file_path = $bag_output_dir . DIRECTORY_SEPARATOR . $ds->dsid . '.' . $mimeTypes[0];
+        $file_path = $bag_temp_dir . DIRECTORY_SEPARATOR . $ds->dsid . '.' . $mimeTypes[0];
         file_put_contents($file_path, $ds_response->getBody());
         $data_files[] = $file_path;
     }
-    generate_bag($pid, $bag_output_dir, $data_files);
+    generate_bag($pid, $bag_temp_dir, $data_files);
 }
 
 /**
@@ -104,7 +105,7 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
  * @param string $pid
  *   The object's PID.
  */
-function generate_bag($pid, $dir, $files) {
+function generate_bag($pid, $bag_temp_dir, $files) {
     global $output_dir;
     global $islandora_base_url;
     global $config;
@@ -128,10 +129,12 @@ function generate_bag($pid, $dir, $files) {
     }
 
     $bag->update();
-    $bag->package($dir);
+    $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
+    $bag->package($bag_output_dir);
     print "Bag for $object_url saved in $output_dir\n";
 
-    cleanup_temp_files($dir);
+    cleanup_temp_files($bag_temp_dir);
+    cleanup_temp_files($bag_output_dir);
 }
 
 /**
