@@ -1,6 +1,6 @@
 # Islandora Fetch Bags
 
-Tool to generate Bags for objects in a remote Islandora instance using Islandora's REST interface.
+Tool to generate [Bags](https://en.wikipedia.org/wiki/BagIt) for objects in a remote Islandora instance using Islandora's REST interface.
 
 [Islandora BagIt](https://github.com/Islandora/islandora_bagit) integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. This tool, on the other hand, can be run from any location with HTTP access to the target Islandora instance. This ability allows for a variety of workflows involving distributed preservation and redunant storage services.
 
@@ -22,7 +22,7 @@ Tool to generate Bags for objects in a remote Islandora instance using Islandora
 
 This script:
 
-1. Queries Solr for the URLs for all objects in the specified namespace, and for each object:
+1. Queries Solr for the PIDs for all objects to generate Bags for, and for each object:
 1. Queries Islandora's REST interface to get a list of its datastreams
 1. Fetches each datastream's content file
 1. Generates a Bag containing all of the object's content files.
@@ -38,8 +38,8 @@ output_dir = '/tmp/fetchbags';
 ; Your site's base URL.
 islandora_base_url = 'http://digital.lib.sfu.ca';
 
-; Solr query used to retrieve the PIDs of objects you want to create Bags for.
-; This one queries for objects whose namespace is 'hiv', with a limit of 20.
+; Solr query used to retrieve the PIDs of objects you want to create Bags for. The one
+; in this sample queries for objects whose namespace is 'hiv', with a limit of 20.
 ; If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
 : a ridiculously high value like 1000000.
 solr_query = "PID:hiv\:*?fl=PID&rows=20"

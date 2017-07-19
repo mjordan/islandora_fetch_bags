@@ -29,7 +29,7 @@ $solr_results = json_decode($solr_response_body);
 $docs = $solr_results->response->docs;
 
 $count = count($docs);
-print "Retrieved $count object URLs, starting to fetch content files.\n";
+print "Retrieved $count object PIDs, starting to fetch content files and generate Bags.\n";
 
 // Assemble each object URL and fetch datastream content.
 foreach ($docs as $doc) {
@@ -45,8 +45,8 @@ foreach ($docs as $doc) {
  *   The site's base URL.
  */
 function describe_object($pid, $islandora_base_url) {
-	$object_url = $islandora_base_url . '/islandora/rest/v1/object/' . $pid;
-	$client = new GuzzleHttp\Client();
+  $object_url = $islandora_base_url . '/islandora/rest/v1/object/' . $pid;
+  $client = new GuzzleHttp\Client();
     $object_response = $client->request('GET', $object_url, [
        'headers' => [
             'Accept' => 'application/json',
@@ -69,7 +69,7 @@ function describe_object($pid, $islandora_base_url) {
  *   The site's base URL.
  */
 function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
-	global $output_dir;
+  global $output_dir;
 
     // Add some custom mimetype -> extension mappings.
     $builder = \Mimey\MimeMappingBuilder::create();
@@ -105,21 +105,21 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
  *   The object's PID.
  */
 function generate_bag($pid, $dir, $files) {
-	global $output_dir;
-	global $islandora_base_url;
-	// @todo: PIDs can contain _, so we need to fix this.
-	$pid_with_colon = preg_replace('/_/', ':', $pid);
-	$object_url = $islandora_base_url . '/islandora/object/' . $pid_with_colon;
-	$bag_info = array(
-	  'Internal-Sender-Identifier' => $object_url,
-	  'External-Description' => 'A simple Bag containing datastreams exported from ' . $pid_with_colon . '.',
-	  'Bagging-Date	' => date("Y-m-d"),
-	);
+    global $output_dir;
+    global $islandora_base_url;
+    // @todo: PIDs can contain _, so we need to fix this.
+    $pid_with_colon = preg_replace('/_/', ':', $pid);
+    $object_url = $islandora_base_url . '/islandora/object/' . $pid_with_colon;
+    $bag_info = array(
+      'Internal-Sender-Identifier' => $object_url,
+      'External-Description' => 'A simple Bag containing datastreams exported from ' . $pid_with_colon . '.',
+      'Bagging-Date ' => date("Y-m-d"),
+    );
 
-	$bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $pid, true, true, true, $bag_info);
-	foreach ($files as $file) {
-	    $bag->addFile($file, basename($file));
-	}
+    $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $pid, true, true, true, $bag_info);
+    foreach ($files as $file) {
+        $bag->addFile($file, basename($file));
+    }
 
     $bag->update();
     $bag->package($dir);
@@ -130,21 +130,23 @@ function generate_bag($pid, $dir, $files) {
 
 /**
  * Deletes a directory and all its children.
-  *
-  * @param string $dir
-  *    The directory to delete.
-  */
+ *
+ * @param string $dir
+ *    The directory to delete.
+ */
 function cleanup_temp_files($dir) {
-	$files = array_diff(scandir($dir), array('.','..'));
-    foreach ($files as $file) {
-    	$child = $dir . DIRECTORY_SEPARATOR . $file;
-        is_dir($child) ? cleanup_temp_files($child) : unlink($child);
-    }
+    $files = array_diff(scandir($dir), array('.','..'));
+        foreach ($files as $file) {
+            $child = $dir . DIRECTORY_SEPARATOR . $file;
+            is_dir($child) ? cleanup_temp_files($child) : unlink($child);
+        }
     rmdir($dir);
 }
 
 /**
  * Returns a list of PIDs from a PID file.
+ *
+ * Not used yet.
  *
  * @param string $pid_file_path
  *   The absolute path to the PID file.
@@ -153,14 +155,14 @@ function cleanup_temp_files($dir) {
  *   A list of PIDs.
  */
 function read_pid_file($pid_file_path) {
-  $pids = array();
-  $lines = file($pid_file_path);
-  foreach ($lines as $pid) {
-    $pid = trim($pid);
-    // Skip commented out rows.
-    if (!preg_match('!(#|//)!', $pid)) {
-      $pids[] = $pid;
+    $pids = array();
+    $lines = file($pid_file_path);
+    foreach ($lines as $pid) {
+        $pid = trim($pid);
+        // Skip commented out rows.
+        if (!preg_match('!(#|//)!', $pid)) {
+            $pids[] = $pid;
+        }
     }
-  }
-  return $pids;
+    return $pids;
 }
