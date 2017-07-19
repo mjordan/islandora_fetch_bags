@@ -1,25 +1,16 @@
 <?php
 
-/**
- * Define some variables.
- */
+if (file_exists(trim($argv[1]))) {
+    $config = parse_ini_file(trim($argv[1]));
+} else {
+    print "Cannot find configuration file " . trim($argv[1]) . "\n";
+    exit;
+}
 
-// Where you want your Bags to be saved. Must exist.
-$output_dir = '/tmp/fetchbags';
-
-// Your site's base URL.
-$site_base_url = 'http://digital.lib.sfu.ca';
-
-// The namespace of the objects you want to generate Bags for.
-$namespace ='hiv';
-
-// Set to 1000000 or some ridiculously high number unless you want a subset.
-$limit = '10';
-
-/**
- * You will not need to change anything below this line.
- */
-
+$output_dir = $config['output_dir'];
+$site_base_url = $config['site_base_url'];
+$namespace = $config['namespace'];
+$limit = $config['limit'];
 
 // @todo: Allow user to define the Solr query.
 $solr_url = $site_base_url . '/islandora/rest/v1/solr/PID:' . $namespace . '\:*?fl=PID&rows=' . $limit;
@@ -90,10 +81,10 @@ function fetch_datastreams($raw_pid, $datastreams, $site_base_url) {
     $mimes = new \Mimey\MimeTypes($builder->getMapping());
 
     $pid = preg_replace('/:/', '_', $raw_pid);
-	$bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
-	@mkdir($bag_output_dir);
-	$client = new GuzzleHttp\Client();
-	$data_files = array();
+    $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
+    @mkdir($bag_output_dir);
+    $client = new GuzzleHttp\Client();
+    $data_files = array();
     foreach ($datastreams as $ds) {
         $ds_url = $site_base_url . '/islandora/rest/v1/object/' . $raw_pid . '/datastream/' . $ds->dsid;
         $ds_response = $client->request('GET', $ds_url, [
@@ -153,4 +144,26 @@ function cleanup_temp_files($dir) {
         is_dir($child) ? cleanup_temp_files($child) : unlink($child);
     }
     rmdir($dir);
+}
+
+/**
+ * Returns a list of PIDs from a PID file.
+ *
+ * @param string $pid_file_path
+ *   The absolute path to the PID file.
+ *
+ * @return array
+ *   A list of PIDs.
+ */
+function read_pid_file($pid_file_path) {
+  $pids = array();
+  $lines = file($pid_file_path);
+  foreach ($lines as $pid) {
+    $pid = trim($pid);
+    // Skip commented out rows.
+    if (!preg_match('!(#|//)!', $pid)) {
+      $pids[] = $pid;
+    }
+  }
+  return $pids;
 }
