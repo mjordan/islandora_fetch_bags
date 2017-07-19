@@ -2,7 +2,7 @@
 
 Tool to generate Bags for objects in a remote Islandora instance using Islandora's REST interface.
 
-[Islandora BagIt](https://github.com/Islandora/islandora_bagit) integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. This tool, on the other hand, can be run from any location with HTTP access to the target Islandora instance.
+[Islandora BagIt](https://github.com/Islandora/islandora_bagit) integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. This tool, on the other hand, can be run from any location with HTTP access to the target Islandora instance. This ability allows for a variety of workflows involving distributed preservation and redunant storage services.
 
 ## Requirements
 
@@ -36,13 +36,13 @@ To use it, create an .ini file like this one:
 output_dir = '/tmp/fetchbags';
 
 ; Your site's base URL.
-site_base_url = 'http://digital.lib.sfu.ca';
+islandora_base_url = 'http://digital.lib.sfu.ca';
 
-; The namespace of the objects you want to generate Bags for.
-namespace ='hiv';
-
-; Set to 1000000 or some ridiculously high number unless you want a subset.
-limit = '10';
+; Solr query used to retrieve the PIDs of objects you want to create Bags for.
+; This one queries for objects whose namespace is 'hiv', with a limit of 20.
+; If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
+: a ridiculously high value like 1000000.
+solr_query = "PID:hiv\:*?fl=PID&rows=20"
 ```
 
 and then run the `fetch.php` command providing the name of your .ini file as its argument:
@@ -61,11 +61,11 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 
 ## To do
 
-* Allow user to determine the specific Solr query that retrieves PIDs (currently the query retrieves all objects with a given namespace).
 * Allow user to populate bag-info.txt tags.
 * Provide option to read PIDs from an input file instead of from a Solr query.
 * Add plugins to allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML) or to fetch books or newspaper issues.
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
+* Add proper error handling and logging.
 
 ## License
 

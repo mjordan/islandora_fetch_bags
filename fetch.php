@@ -1,5 +1,8 @@
 <?php
 
+require_once 'vendor/autoload.php';
+require 'vendor/scholarslab/bagit/lib/bagit.php';
+
 if (file_exists(trim($argv[1]))) {
     $config = parse_ini_file(trim($argv[1]));
 } else {
@@ -8,15 +11,9 @@ if (file_exists(trim($argv[1]))) {
 }
 
 $output_dir = $config['output_dir'];
-$site_base_url = $config['site_base_url'];
-$namespace = $config['namespace'];
-$limit = $config['limit'];
-
-// @todo: Allow user to define the Solr query.
-$solr_url = $site_base_url . '/islandora/rest/v1/solr/PID:' . $namespace . '\:*?fl=PID&rows=' . $limit;
-
-require_once 'vendor/autoload.php';
-require 'vendor/scholarslab/bagit/lib/bagit.php';
+$islandora_base_url = $config['islandora_base_url'];
+$solr_query = $config['solr_query'];
+$solr_url = $islandora_base_url . '/islandora/rest/v1/solr/' . $solr_query;
 
 // Get the results of the Solr query.
 $client = new GuzzleHttp\Client();
@@ -36,7 +33,7 @@ print "Retrieved $count object URLs, starting to fetch content files.\n";
 
 // Assemble each object URL and fetch datastream content.
 foreach ($docs as $doc) {
-    describe_object($doc->PID, $site_base_url);
+    describe_object($doc->PID, $islandora_base_url);
 }
 
 /**
@@ -44,11 +41,11 @@ foreach ($docs as $doc) {
  *
  * @param string $pid
  *   The object's PID.
- * @param string $site_base_url
+ * @param string $islandora_base_url
  *   The site's base URL.
  */
-function describe_object($pid, $site_base_url) {
-	$object_url = $site_base_url . '/islandora/rest/v1/object/' . $pid;
+function describe_object($pid, $islandora_base_url) {
+	$object_url = $islandora_base_url . '/islandora/rest/v1/object/' . $pid;
 	$client = new GuzzleHttp\Client();
     $object_response = $client->request('GET', $object_url, [
        'headers' => [
@@ -58,7 +55,7 @@ function describe_object($pid, $site_base_url) {
     ]);
 
     $object_response_body = json_decode($object_response->getBody());
-    fetch_datastreams($pid, $object_response_body->datastreams, $site_base_url);
+    fetch_datastreams($pid, $object_response_body->datastreams, $islandora_base_url);
 }
 
 /**
@@ -68,10 +65,10 @@ function describe_object($pid, $site_base_url) {
  *   The list of datastreams retrieved from the "describe object" URL.
  * @param string $pid
  *   The object's PID.
- * @param string $site_base_url
+ * @param string $islandora_base_url
  *   The site's base URL.
  */
-function fetch_datastreams($raw_pid, $datastreams, $site_base_url) {
+function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
 	global $output_dir;
 
     // Add some custom mimetype -> extension mappings.
@@ -86,7 +83,7 @@ function fetch_datastreams($raw_pid, $datastreams, $site_base_url) {
     $client = new GuzzleHttp\Client();
     $data_files = array();
     foreach ($datastreams as $ds) {
-        $ds_url = $site_base_url . '/islandora/rest/v1/object/' . $raw_pid . '/datastream/' . $ds->dsid;
+        $ds_url = $islandora_base_url . '/islandora/rest/v1/object/' . $raw_pid . '/datastream/' . $ds->dsid;
         $ds_response = $client->request('GET', $ds_url, [
             'headers' => [
                 // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
@@ -109,10 +106,10 @@ function fetch_datastreams($raw_pid, $datastreams, $site_base_url) {
  */
 function generate_bag($pid, $dir, $files) {
 	global $output_dir;
-	global $site_base_url;
+	global $islandora_base_url;
 	// @todo: PIDs can contain _, so we need to fix this.
 	$pid_with_colon = preg_replace('/_/', ':', $pid);
-	$object_url = $site_base_url . '/islandora/object/' . $pid_with_colon;
+	$object_url = $islandora_base_url . '/islandora/object/' . $pid_with_colon;
 	$bag_info = array(
 	  'Internal-Sender-Identifier' => $object_url,
 	  'External-Description' => 'A simple Bag containing datastreams exported from ' . $pid_with_colon . '.',
