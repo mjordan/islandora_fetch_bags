@@ -63,9 +63,10 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 
 * Allow user to populate bag-info.txt tags.
 * Provide option to read PIDs from an input file instead of from a Solr query.
-* Add plugins to allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML) or to fetch books or newspaper issues.
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
+* Add plugins to allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML) or to fetch books or newspaper issues.
 * Add proper error handling and logging.
+* Add support for access to the REST interface restricted by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
 ## License
 
