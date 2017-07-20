@@ -99,7 +99,7 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
 }
 
 /**
- * Generates a Bag from object's fetched content files.
+ * Generates a Bag from the object's datastream content files.
  *
  * @param string $pid
  *   The object's PID.
@@ -132,6 +132,12 @@ function generate_bag($pid, $bag_temp_dir, $files) {
         $bag->addFile($file, basename($file));
     }
 
+    if (isset($config['bag']['fetch'])) {
+        foreach ($config['bag']['fetch'] as $fetch_url) {
+            $bag->fetch->add($fetch_url, basename(parse_url($fetch_url, PHP_URL_PATH)));
+        }
+    }
+
     $bag->update();
     $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
     if ($config['bag']['compression'] == 'tgz' or $config['bag']['compression'] == 'zip') {
@@ -160,8 +166,6 @@ function cleanup_temp_files($dir) {
 
 /**
  * Returns a list of PIDs from Solr.
- *
- * Not used yet.
  *
  * @param string $islandora_base_url
  *   The target Islandora instance's base URL.
@@ -198,8 +202,6 @@ function get_pids_from_solr($islandora_base_url, $solr_query) {
 
 /**
  * Returns a list of PIDs from a PID file.
- *
- * Not used yet.
  *
  * @param string $pid_file_path
  *   The absolute path to the PID file.

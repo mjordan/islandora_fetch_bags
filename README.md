@@ -60,6 +60,10 @@ solr_query = "PID:hiv\:*?fl=PID&rows=20"
 ; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
 ; compression = none
 
+; URLs added to the 'fetch[]' setting will be added to the Bag's fetch.txt file.
+; fetch[] = "http://example.com/termsofuse.htm"
+; fetch[] = "http://example.com/contact.htm"
+
 [bag-info]
 ; Tags defined in this section are added to the bag-info.txt file in each Bag.
 ; Two tags are always added: Internal-Sender-Identifier and Bagging-Date. The first
