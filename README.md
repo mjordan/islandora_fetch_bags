@@ -33,16 +33,16 @@ To use it, create an .ini file like this one:
 ; Sample .ini file for the Islandora Fetch Bags tool
 
 [general]
+; Your site's base URL.
+islandora_base_url = 'http://digital.lib.sfu.ca';
+
 ; Where you want your Bags to be saved. Must exist.
-output_dir = '/tmp/marksbags'
+output_dir = '/tmp/bags'
 
 ; Directory for saving fetched files temporarily. Must exist.
 ; Important: Always use a specific directory for 'temp_dir'
 ; (and not '/tmp') since its contents are deleted after Bags are created.
-temp_dir = '/tmp/fetchbags';
-
-; Your site's base URL.
-islandora_base_url = 'http://digital.lib.sfu.ca';
+temp_dir = '/tmp/tmpbags';
 
 [objects]
 ; 'solr_query' is used to retrieve the PIDs of objects you want to create Bags for. The
@@ -51,22 +51,30 @@ islandora_base_url = 'http://digital.lib.sfu.ca';
 ; a ridiculously high value like 1000000.
 solr_query = "PID:hiv\:*?fl=PID&rows=20"
 
-; 'pid_file' is the full path to to a file listing one PID per row. // and # can
+; 'pid_file' is the full path to a file listing one PID per row. // and # can
 ; be used to comment out lines. Note that 'pid_file' and 'solr_query' are
 ; mutually exclusive.
 ; pid_file = "/tmp/create_bags_for_these_pids.txt'
 
+[bag]
+; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
+; compression = none
+
 [bag-info]
 ; Tags defined in this section are added to the bag-info.txt file in each Bag.
+; Two tags are always added: Internal-Sender-Identifier and Bagging-Date. The first
+; is assigned the object's URL and the second is assigned the current date, e.g.:
+; Internal-Sender-Identifier: http://digital.lib.sfu.ca/islandora/object/hiv:26
+; Bagging-Date : 2017-07-19
 tags[] = 'Contact-Email:bag-creators@sfu.ca'
 tags[] = 'Source-Organization:Simon Fraser University Library'
 ```
 
-and then run the `fetch.php` command providing the name of your .ini file as its argument:
+Once you have your .ini file, run the `fetch.php` command, providing the name of your .ini file as its argument:
 
-`php fetch.php config.ini`
+`php fetch.php myconfig.ini`
 
-Your Bags will be in the directory specified in the location specified in your `output_dir` .ini value.
+Your Bags will be saved in the directory specified in the location specified in your `output_dir` .ini value.
 
 ## Maintainer
 
@@ -78,9 +86,11 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 
 ## To do
 
-* Provide more user control over contents of bag-info.txt (maybe via plugins?).
+* Make the tool more configurable/customizable:
+  * Provide more user control over contents of bag-info.txt.
+  * Allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML).
+  * Allow the creation of Bags for complex object such as books or newspaper issues.
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
-* Add plugins to allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML) or to fetch books or newspaper issues.
 * Add proper error handling and logging.
 * Add support for access to the REST interface restricted by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 

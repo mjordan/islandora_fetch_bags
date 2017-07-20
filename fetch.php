@@ -13,6 +13,8 @@ if (file_exists(trim($argv[1]))) {
 $temp_dir = $config['general']['temp_dir'];
 $output_dir = $config['general']['output_dir'];
 $islandora_base_url = rtrim($config['general']['islandora_base_url'], '/');
+$config['bag']['compression'] = isset($config['bag']['compression']) ?
+    $config['bag']['compression'] : 'tgz';
 
 $pids = array();
 if (isset($config['objects']['solr_query'])) {
@@ -132,11 +134,13 @@ function generate_bag($pid, $bag_temp_dir, $files) {
 
     $bag->update();
     $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
-    $bag->package($bag_output_dir);
+    if ($config['bag']['compression'] == 'tgz' or $config['bag']['compression'] == 'zip') {
+        $bag->package($bag_output_dir, $config['bag']['compression']);
+        cleanup_temp_files($bag_output_dir);
+    }
     print "Bag for $object_url saved in $output_dir\n";
 
     cleanup_temp_files($bag_temp_dir);
-    cleanup_temp_files($bag_output_dir);
 }
 
 /**
