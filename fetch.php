@@ -128,6 +128,7 @@ function generate_bag($pid, $bag_temp_dir, $files) {
     }
 
     $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $pid, true, true, true, $bag_info);
+
     foreach ($files as $file) {
         $bag->addFile($file, basename($file));
     }
@@ -135,6 +136,14 @@ function generate_bag($pid, $bag_temp_dir, $files) {
     if (isset($config['bag']['fetch'])) {
         foreach ($config['bag']['fetch'] as $fetch_url) {
             $bag->fetch->add($fetch_url, basename(parse_url($fetch_url, PHP_URL_PATH)));
+        }
+    }
+
+    if (isset($config['bag']['plugins'])) {
+        foreach ($config['bag']['plugins'] as $plugin) {
+            $plugin_name = '\ifb\plugins\\' . $plugin;
+            $bag_plugin = new $plugin_name($config);
+            $bag = $bag_plugin->execute($bag);
         }
     }
 

@@ -1,4 +1,11 @@
-{
+{    
+    "name": "Islandora Fetch Bags",
+    "license": "Unlicense",
+    "type": "project",
+    "description": "Command-line tool for generating Bags via Islandora's REST interface.",
+    "autoload": {
+        "classmap": ["src/"]
+    },
     "require": {
         "guzzlehttp/guzzle": "~6.0",
         "scholarslab/bagit": "~0.2",

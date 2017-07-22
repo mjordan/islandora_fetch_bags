@@ -2,7 +2,7 @@
 
 Tool to generate [Bags](https://en.wikipedia.org/wiki/BagIt) for objects using Islandora's REST interface.
 
-The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) module integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. Islandora Fetch Bags, on the other hand, can be run from any location with HTTP access to the target Islandora instance. This ability enables a variety of workflows for distributed preservation and redunant storage services.
+The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) module integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. Islandora Fetch Bags, on the other hand, can be run from any location with HTTP access to the target Islandora instance, enabling flexible, distributed preservation workflows.
 
 ## Requirements
 
@@ -90,10 +90,7 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 
 ## To do
 
-* Make the tool more configurable/customizable:
-  * Provide more user control over contents of bag-info.txt.
-  * Allow the retrieval or creation of additional files to add to the Bag (such as PREMIS XML).
-  * Allow the creation of Bags for complex object such as books or newspaper issues.
+* Allow the creation of Bags for complex object such as books or newspaper issues.
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
 * Add proper error handling and logging.
 * Add support for access to the REST interface restricted by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
