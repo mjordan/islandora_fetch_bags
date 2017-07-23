@@ -1,14 +1,22 @@
 <?php
 
+/**
+ * @file
+ * Defines the AbstractIfbPlugin class.
+ */
+
 namespace ifb\plugins;
 
 /**
- *
+ * Abstract class for plugins.
  */
 abstract class AbstractIfbPlugin 
 {
     /**
+     * Constructor.
      *
+     * @param array $config
+     *    The configuration data from the .ini file.
      */
     public function __construct($config)
     {
@@ -16,12 +24,14 @@ abstract class AbstractIfbPlugin
     }
 
     /**
-     * Router function for all plugins.
+     * Modifies the current Bag.
      *
-     * @param $args
-     *    Array of arguments. Varies by plugin type.
+     * All plugins must implement this method.
      *
-     * @return Either 
+     * @param object $bag
+     *    The Bag object.
+     *
+     * @return The modified Bag.
      */
-    abstract public function execute($args);
+    abstract public function execute($bag);
 }

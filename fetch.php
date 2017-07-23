@@ -148,6 +148,7 @@ function generate_bag($pid, $bag_temp_dir, $files) {
     }
 
     $bag->update();
+
     $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
     if ($config['bag']['compression'] == 'tgz' or $config['bag']['compression'] == 'zip') {
         $bag->package($bag_output_dir, $config['bag']['compression']);

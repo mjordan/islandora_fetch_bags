@@ -60,6 +60,10 @@ solr_query = "PID:hiv\:*?fl=PID&rows=20"
 ; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
 ; compression = none
 
+; Plugins are PHP classes that modify the Bag. See below for more information.
+; plugins[] = BasicCustomBag
+; plugins[] = AdvancedCustomBag
+
 ; URLs added to the 'fetch[]' setting will be added to the Bag's fetch.txt file.
 ; fetch[] = "http://example.com/termsofuse.htm"
 ; fetch[] = "http://example.com/contact.htm"
@@ -80,6 +84,15 @@ Once you have your .ini file, run the `fetch.php` command, providing the name of
 
 Your Bags will be saved in the directory specified in the location specified in your `output_dir` .ini value.
 
+## Plugins
+
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is nothing more than a simple PHP class file. The abstract class plus two examples are in the `src/plugins` directory. You enable a plugin by registering its class name in the `[bag]` section of your .ini file like this:
+
+[bag]
+plugins[] = MyPlugin
+
+Once you have done that, and you have placed your plugin in the `src/plugins` directory, you will need to run composer's `dump-autoload` command so that your plugin will be detected.
+
 ## Maintainer
 
 * [Mark Jordan](https://github.com/mjordan)
@@ -93,7 +106,7 @@ Bug reports, use cases and suggestions are welcome. If you want to open a pull r
 * Allow the creation of Bags for complex object such as books or newspaper issues.
 * Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
 * Add proper error handling and logging.
-* Add support for access to the REST interface restricted by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
+* Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
 ## License
 
