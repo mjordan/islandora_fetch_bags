@@ -2,7 +2,7 @@
 
 Tool to generate [Bags](https://en.wikipedia.org/wiki/BagIt) for objects using Islandora's REST interface.
 
-The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) module integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags. Islandora Fetch Bags, on the other hand, can be run from any location with HTTP access to the target Islandora instance, enabling flexible, distributed preservation workflows.
+The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) module integrates Bag creation into the Islandora user interface, and also provides a Drush command to generate Bags and save them on the Islandora server's file system. Islandora Fetch Bags, on the other hand, can be run from any location with HTTP access to the target Islandora instance, enabling flexible, distributed preservation workflows.
 
 ## Requirements
 
@@ -87,9 +87,27 @@ Once you have your .ini file, run the `fetch.php` command, providing the name of
 
 When the script finishes, your Bags will be saved in the directory specified in your `output_dir` .ini value.
 
+## Solr queries
+
+The `[objects] solr_query` setting can take any Solr query that is compatible with Islandora REST's `solr` endpoint (which is pretty much any Solr query). Queries should:
+
+* specify the `fl=PID` parameter, since they only need to return a list of PIDs
+* have a `rows` paramter with a very high value, such as 1000000, to ensure that your query returns all the PIDs that it finds (Solr's default is 10 rows)
+* have any [special characters](http://lucene.apache.org/core/4_5_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html?is-external=true#Escaping_Special_Characters) escaped with a backslash.
+* be URL encoded.
+
+Some useful queries include:
+
+* `PID:foo\:*?fl=PID&rows=1000000`
+  * Retrieves all objects with a namespace of "foo"
+* `RELS_EXT_isMemberOfCollection_uri_ms:info\:fedora/islandora\:sp_basic_image_collection`
+  * Retrieves all objects that are members of the islandora:sp_basic_image_collection
+* `fgs_lastModifiedDate_dt:[2017-07-21T00:00:00.000Z TO *]`
+  * Retrieves all objects modified since 2017-07-12 UTC.
+
 ## Plugins
 
-If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two examples are in the `src/plugins` directory.
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory.
 
 Once you have written a plugin, do the following to use it:
 
@@ -102,6 +120,8 @@ Once you have written a plugin, do the following to use it:
 plugins[] = MyPlugin
 ```
 
+Within you plugin's `->execute()` method, you can use any of [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use it `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
+
 ## Maintainer
 
 * [Mark Jordan](https://github.com/mjordan)
@@ -113,7 +133,6 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 ## To do
 
 * Allow the creation of Bags for complex object such as books or newspaper issues.
-* Document Solr queries, like retieving PIDs for objects updated after a `fgs_lastModifiedDate_dt` value, or all objects in a collection.
 * Add proper error handling and logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
