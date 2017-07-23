@@ -33,7 +33,7 @@ To use it, create an .ini file like this one:
 ; Sample .ini file for the Islandora Fetch Bags tool
 
 [general]
-; Your site's base URL.
+; Your Islandora instance's base URL. Do not include the trailing /.
 islandora_base_url = 'http://digital.lib.sfu.ca';
 
 ; Where you want your Bags to be saved. Must exist.
@@ -45,22 +45,25 @@ output_dir = '/tmp/bags'
 temp_dir = '/tmp/tmpbags';
 
 [objects]
-; 'solr_query' is used to retrieve the PIDs of objects you want to create Bags for. The
-; one in this sample queries for objects whose namespace is 'hiv', with a limit of 20.
-; If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
+; You can select which objects to create Bags for in two ways, 1) a Solr query or
+; 2) a list of PIDs. Note that these two options are mutually exclusive.
+
+; Use 'solr_query' if you want to get a list of PIDs from your Islandora instance's Solr
+; index. The query in this example queries for objects whose namespace is 'hiv', with a
+; limit of 20. If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
 ; a ridiculously high value like 1000000.
 solr_query = "PID:hiv\:*?fl=PID&rows=20"
 
-; 'pid_file' is the full path to a file listing one PID per row. // and # can
-; be used to comment out lines. Note that 'pid_file' and 'solr_query' are
-; mutually exclusive.
+; Use 'pid_file' if you have a specific list of PIDs. The 'pid_file' setting defines
+; the full path to a file listing the PIDs, one PID per row. // and # can be used to
+; comment out lines.
 ; pid_file = "/tmp/create_bags_for_these_pids.txt'
 
 [bag]
 ; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
 ; compression = none
 
-; Plugins are PHP classes that modify the Bag. See below for more information.
+; Plugins are PHP code that modify the Bag. See the README's "Plugins" section for more info.
 ; plugins[] = BasicCustomBag
 ; plugins[] = AdvancedCustomBag
 
@@ -82,7 +85,7 @@ Once you have your .ini file, run the `fetch.php` command, providing the name of
 
 `php fetch.php myconfig.ini`
 
-Your Bags will be saved in the directory specified in the location specified in your `output_dir` .ini value.
+When the script finishes, your Bags will be saved in the directory specified in your `output_dir` .ini value.
 
 ## Plugins
 
