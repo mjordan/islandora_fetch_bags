@@ -86,12 +86,18 @@ Your Bags will be saved in the directory specified in the location specified in 
 
 ## Plugins
 
-If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is nothing more than a simple PHP class file. The abstract class plus two examples are in the `src/plugins` directory. You enable a plugin by registering its class name in the `[bag]` section of your .ini file like this:
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two examples are in the `src/plugins` directory.
 
+Once you have written a plugin, do the following to use it:
+
+1. placed your plugin in the `src/plugins` directory
+1. run composer's `dump-autoload` command so that your plugin will be detected
+1. enable your plugin by registering its class name in the `[bag]` section of your .ini file like this:
+
+```
 [bag]
 plugins[] = MyPlugin
-
-Once you have done that, and you have placed your plugin in the `src/plugins` directory, you will need to run composer's `dump-autoload` command so that your plugin will be detected.
+```
 
 ## Maintainer
 
@@ -99,7 +105,7 @@ Once you have done that, and you have placed your plugin in the `src/plugins` di
 
 ## Development and feedback
 
-Bug reports, use cases and suggestions are welcome. If you want to open a pull request, please open an issue first.
+Bug reports, use cases and suggestions are welcome. So are plugins! If you want to open a pull request, please open an issue first.
 
 ## To do
 
