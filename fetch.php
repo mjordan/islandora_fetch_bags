@@ -115,19 +115,15 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
     global $islandora_base_url;
     global $config;
     $pid = $object_response_body->pid;
-    // @todo: PIDs can contain _, so we need to fix this.
     $object_url = $islandora_base_url . '/islandora/object/' . $pid;
 
-    $bag_info = array(
-      'Internal-Sender-Identifier' => $object_url,
-      'Bagging-Date ' => date("Y-m-d"),
-    );
-
+    $bag_info = array();
     foreach ($config['bag-info']['tags'] as $bag_info_tag) {
         list($tag, $value) = explode(':', $bag_info_tag);
         $bag_info[$tag] = trim($value);
     }
 
+    // @todo: PIDs can contain _, so we need to fix this.
     $filesystem_safe_pid = preg_replace('/:/', '_', $pid);
 
     $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $filesystem_safe_pid, true, true, true, $bag_info);

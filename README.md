@@ -63,20 +63,18 @@ solr_query = "PID:hiv\:*?fl=PID&rows=20"
 ; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
 ; compression = none
 
-; Plugins are PHP code that modify the Bag. See the README's "Plugins" section for more info.
-; plugins[] = BasicCustomBag
-; plugins[] = AdvancedCustomBag
+; See the README's "Plugins" section for more info.
+plugins[] = AddCommonTags
+; plugins[] = AddObjectProperties
 
 ; URLs added to the 'fetch[]' setting will be added to the Bag's fetch.txt file.
 ; fetch[] = "http://example.com/termsofuse.htm"
 ; fetch[] = "http://example.com/contact.htm"
 
 [bag-info]
-; Tags defined in this section are added to the bag-info.txt file in each Bag.
-; Two tags are always added: Internal-Sender-Identifier and Bagging-Date. The first
-; is assigned the object's URL and the second is assigned the current date, e.g.:
-; Internal-Sender-Identifier: http://digital.lib.sfu.ca/islandora/object/hiv:26
-; Bagging-Date : 2017-07-19
+; Tags defined in this section are added to the bag-info.txt file in each Bag. Values must
+; be literal strings. If you want to generate values based on properties of the object, you
+; will need to write a plugin.
 tags[] = 'Contact-Email:bag-creators@sfu.ca'
 tags[] = 'Source-Organization:Simon Fraser University Library'
 ```
@@ -107,18 +105,28 @@ Some useful queries include:
 
 ## Plugins
 
-If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. A third plugin, AddObjectProperties, can be used to add a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.).
-
-Once you have written a plugin, do the following to use it:
-
-1. placed your plugin in the `src/plugins` directory
-1. run composer's `dump-autoload` command so that your plugin will be detected
-1. enable your plugin by registering its class name in the `[bag]` section of your .ini file like this:
+A plugin is a simple PHP class file that modifies each Bag. To enable a plugin, add its name to the `[bag]` section of your .ini file, like this:
 
 ```
 [bag]
 plugins[] = MyPlugin
 ```
+
+Two plugins that you might find useful are:
+
+* AddCommonTags
+  * Adds a `Internal-Sender-Identifier` tag to bagit-info.txt with the object's URL as its value
+  * Adds a `Bagging-Date` tag to bagit-info.txt with the current date in yyyy-mm-dd format as its value
+* AddObjectProperties
+  * Adds a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.)
+
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. A third plugin, AddObjectProperties, can be used to add a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.).
+
+If you want to write your own plugin, consult the examples, `BasicCustomBag.php` and `AdvancedCustomBag.php`, in `src/plugins`. Once you have written a plugin, do the following to use it:
+
+1. placed your plugin in the `src/plugins` directory
+1. run composer's `dump-autoload` command so that your plugin's class file will be detected
+1. enable your plugin by registering its class name in the `[bag]` section of your .ini file, as illustrated above
 
 Within you plugin's `->execute()` method, you can use any of [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
 
