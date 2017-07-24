@@ -28,7 +28,7 @@ class AdvancedCustomBag extends AbstractIfbPlugin
      * Also delete the TN and MEDIUM_SIZE datastram files before packaging
      * up the Bag.
      */
-    public function execute($bag)
+    public function execute($bag, $object_response_body)
     {
         // Remove some files you don't want in your Bags.
         unlink($bag->bagDirectory . DIRECTORY_SEPARATOR . 'data/TN.jpeg');

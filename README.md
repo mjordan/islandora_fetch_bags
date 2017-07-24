@@ -107,7 +107,7 @@ Some useful queries include:
 
 ## Plugins
 
-If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory.
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. A third plugin, AddObjectProperties, can be used to add a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.).
 
 Once you have written a plugin, do the following to use it:
 
@@ -120,7 +120,7 @@ Once you have written a plugin, do the following to use it:
 plugins[] = MyPlugin
 ```
 
-Within you plugin's `->execute()` method, you can use any of [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use it `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
+Within you plugin's `->execute()` method, you can use any of [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
 
 ## Maintainer
 

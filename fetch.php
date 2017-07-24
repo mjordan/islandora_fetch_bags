@@ -55,21 +55,21 @@ function describe_object($pid, $islandora_base_url) {
     ]);
 
     $object_response_body = json_decode($object_response->getBody());
-    fetch_datastreams($pid, $object_response_body->datastreams, $islandora_base_url);
+    fetch_datastreams($object_response_body, $islandora_base_url);
 }
 
 /**
  * Gets all of the datastream content files and save them in a directory.
  *
- * @param array $datastreams
- *   The list of datastreams retrieved from the "describe object" URL.
- * @param string $pid
- *   The object's PID.
+ * @param object $object_response_body
+ *   The body of the REST request to describe the Islandora object.
  * @param string $islandora_base_url
  *   The site's base URL.
  */
-function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
+function fetch_datastreams($object_response_body, $islandora_base_url) {
     global $temp_dir;
+    $raw_pid = $object_response_body->pid;
+    $datastreams = $object_response_body->datastreams;
 
     // Add some custom mimetype -> extension mappings.
     $builder = \Mimey\MimeMappingBuilder::create();
@@ -95,27 +95,28 @@ function fetch_datastreams($raw_pid, $datastreams, $islandora_base_url) {
         file_put_contents($file_path, $ds_response->getBody());
         $data_files[] = $file_path;
     }
-    generate_bag($pid, $bag_temp_dir, $data_files);
+    // generate_bag($pid, $bag_temp_dir, $data_files);
+    generate_bag($object_response_body, $bag_temp_dir, $data_files);
 }
 
 /**
  * Generates a Bag from the object's datastream content files.
  *
- * @param string $pid
- *   The object's PID.
+ * @param object $object_response_body
+ *   The body of the REST request to describe the Islandora object.
  * @param string $bag_temp_dir
  *   The object-level temporary directory where
  *   fetched datastream files have been saved.
  * @param array $files
  *   Array of file paths to the saved files.
  */
-function generate_bag($pid, $bag_temp_dir, $files) {
+function generate_bag($object_response_body, $bag_temp_dir, $files) {
     global $output_dir;
     global $islandora_base_url;
     global $config;
+    $pid = $object_response_body->pid;
     // @todo: PIDs can contain _, so we need to fix this.
-    $pid_with_colon = preg_replace('/_/', ':', $pid);
-    $object_url = $islandora_base_url . '/islandora/object/' . $pid_with_colon;
+    $object_url = $islandora_base_url . '/islandora/object/' . $pid;
 
     $bag_info = array(
       'Internal-Sender-Identifier' => $object_url,
@@ -127,7 +128,9 @@ function generate_bag($pid, $bag_temp_dir, $files) {
         $bag_info[$tag] = trim($value);
     }
 
-    $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $pid, true, true, true, $bag_info);
+    $filesystem_safe_pid = preg_replace('/:/', '_', $pid);
+
+    $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $filesystem_safe_pid, true, true, true, $bag_info);
 
     foreach ($files as $file) {
         $bag->addFile($file, basename($file));
@@ -143,7 +146,7 @@ function generate_bag($pid, $bag_temp_dir, $files) {
         foreach ($config['bag']['plugins'] as $plugin) {
             $plugin_name = '\ifb\plugins\\' . $plugin;
             $bag_plugin = new $plugin_name($config);
-            $bag = $bag_plugin->execute($bag);
+            $bag = $bag_plugin->execute($bag, $object_response_body);
         }
     }
 

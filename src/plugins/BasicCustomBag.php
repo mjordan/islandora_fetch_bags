@@ -26,7 +26,7 @@ class BasicCustomBag extends AbstractIfbPlugin
     /**
      * Add an extra file, set an extra tag.
      */
-    public function execute($bag)
+    public function execute($bag, $object_response_body)
     {
         $bag->addFile('/path/to/extra_file.txt', 'extra_subdir/extra_file.txt');
         $bag->setBagInfoData('My-Custom-Tag', 'Hey there!');
