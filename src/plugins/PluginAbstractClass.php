@@ -31,7 +31,7 @@ abstract class AbstractIfbPlugin
      * @param object $bag
      *    The Bag object.
      * @param object $object_response_body
-     *   The body of the REST request to describe the Islandora object. This
+     *   The body of the REST "describe an object" request. This response
      *   object has been converted from the JSON structure described at
      *   https://github.com/discoverygarden/islandora_rest#describe-an-existing-object
      *   by json_decode() into a PHP object.

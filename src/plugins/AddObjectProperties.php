@@ -24,8 +24,9 @@ class AddObjectProperties extends AbstractIfbPlugin
     }
 
     /**
-     * Get object properties from the original REST request response, save them
-     * to a JSON file in the temporary directory, then add that file to the Bag.
+     * Get object properties from the original REST "describe an object "request
+     * response, save them to a JSON file in the temporary directory, then add
+     * that file to the Bag.
      */
     public function execute($bag, $object_response_body)
     {

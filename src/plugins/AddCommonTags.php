@@ -32,6 +32,7 @@ class AddCommonTags extends AbstractIfbPlugin
         $pid = $object_response_body->pid;
         $islandora_base_url = rtrim($this->config['general']['islandora_base_url'], '/');
         $object_url = $islandora_base_url . '/islandora/object/' . $pid;
+
         $bag->setBagInfoData('Internal-Sender-Identifier', $object_url);
         $bag->setBagInfoData('Bagging-Date', date("Y-m-d"));
         return $bag;

@@ -24,8 +24,8 @@ class AddChildrenPids extends AbstractIfbPlugin
     }
 
     /**
-     * Get object's children, save them to a JSON file in the temporary
-     * directory, then add that file to the Bag.
+     * Get object's children PIDs and sequence info, save them to a JSON
+     * file in the temporary directory, then add that file to the Bag.
      */
     public function execute($bag, $object_response_body)
     {
@@ -53,7 +53,7 @@ class AddChildrenPids extends AbstractIfbPlugin
      *    The PID of the object being Bagged.
      * @param array $cmodels
      *    The content models of the object being Bagged, as returned from the
-     *    initial "describe and object" REST request.
+     *    initial "describe an object" REST request.
      *
      * @return object
      *    The Solr result's documents.
