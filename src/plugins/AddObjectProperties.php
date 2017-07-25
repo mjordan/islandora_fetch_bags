@@ -24,14 +24,18 @@ class AddObjectProperties extends AbstractIfbPlugin
     }
 
     /**
-     * Get object properties from the original REST request response, save
-     * them to a JSON file, then add that file to the Bag.
+     * Get object properties from the original REST request response, save them
+     * to a JSON file in the temporary directory, then add that file to the Bag.
      */
     public function execute($bag, $object_response_body)
     {
         $object_properties = json_encode($object_response_body);
-        $object_properties_file_path = $bag->bagDirectory . DIRECTORY_SEPARATOR . 'object_properties.json';
+        $pid = preg_replace('/:/', '_', $object_response_body->pid);
+
+        $bag_temp_dir = $this->config['general']['temp_dir'] . DIRECTORY_SEPARATOR . $pid;
+        $object_properties_file_path = $bag_temp_dir . DIRECTORY_SEPARATOR . 'object_properties.json';
         file_put_contents($object_properties_file_path, $object_properties);
+
         $bag->addFile($object_properties_file_path, 'object_properties.json');
         return $bag;
     }

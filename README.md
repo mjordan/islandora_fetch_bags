@@ -120,6 +120,8 @@ Two plugins that you might find useful are:
 * AddObjectProperties
   * Adds a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.)
 
+Plugins are executed in the order in which they are registered in the .ini file.
+
 If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. A third plugin, AddObjectProperties, can be used to add a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.).
 
 If you want to write your own plugin, consult the examples, `BasicCustomBag.php` and `AdvancedCustomBag.php`, in `src/plugins`. Once you have written a plugin, do the following to use it:
@@ -141,6 +143,7 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 ## To do
 
 * Allow the creation of Bags for complex object such as books or newspaper issues.
+* Provide a way to configure the Bag filename.
 * Add proper error handling and logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 

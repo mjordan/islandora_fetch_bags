@@ -30,16 +30,6 @@ class AdvancedCustomBag extends AbstractIfbPlugin
      */
     public function execute($bag, $object_response_body)
     {
-/*
-        // @todo: Get this to work...
-        // Modify the Bag's output directory/zip filename
-        $pathinfo = pathinfo($bag->bagDirectory);
-        $filename = $pathinfo['filename'];
-        $new_filename = "myprefix_" . $filename;
-        $bag->bag = $pathinfo['dirname'] . DIRECTORY_SEPARATOR . $new_filename;
-        $bag->bagDirectory = $pathinfo['dirname'] . DIRECTORY_SEPARATOR . $new_filename;
-*/
-
         // Remove some files you don't want in your Bags.
         unlink($bag->bagDirectory . DIRECTORY_SEPARATOR . 'data/TN.jpeg');
         unlink($bag->bagDirectory . DIRECTORY_SEPARATOR . 'data/MEDIUM_SIZE.jpeg');

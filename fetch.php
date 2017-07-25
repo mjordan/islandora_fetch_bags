@@ -95,7 +95,6 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
         file_put_contents($file_path, $ds_response->getBody());
         $data_files[] = $file_path;
     }
-    // generate_bag($pid, $bag_temp_dir, $data_files);
     generate_bag($object_response_body, $bag_temp_dir, $data_files);
 }
 
@@ -126,7 +125,8 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
     // @todo: PIDs can contain _, so we need to fix this.
     $filesystem_safe_pid = preg_replace('/:/', '_', $pid);
 
-    $bag = new BagIt($output_dir . DIRECTORY_SEPARATOR . $filesystem_safe_pid, true, true, true, $bag_info);
+    $bag_dir = $output_dir . DIRECTORY_SEPARATOR . $filesystem_safe_pid;
+    $bag = new BagIt($bag_dir, true, true, true, $bag_info);
 
     foreach ($files as $file) {
         $bag->addFile($file, basename($file));
