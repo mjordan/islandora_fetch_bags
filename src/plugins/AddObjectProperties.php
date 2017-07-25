@@ -32,6 +32,8 @@ class AddObjectProperties extends AbstractIfbPlugin
         $object_properties = json_encode($object_response_body);
         $pid = preg_replace('/:/', '_', $object_response_body->pid);
 
+        // Always save downloaded or written files to the temp directory so they are
+        // cleaned up properly.
         $bag_temp_dir = $this->config['general']['temp_dir'] . DIRECTORY_SEPARATOR . $pid;
         $object_properties_file_path = $bag_temp_dir . DIRECTORY_SEPARATOR . 'object_properties.json';
         file_put_contents($object_properties_file_path, $object_properties);

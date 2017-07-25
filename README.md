@@ -57,7 +57,7 @@ solr_query = "PID:hiv\:*?fl=PID&rows=20"
 ; Use 'pid_file' if you have a specific list of PIDs. The 'pid_file' setting defines
 ; the full path to a file listing the PIDs, one PID per row. // and # can be used to
 ; comment out lines.
-; pid_file = "/tmp/create_bags_for_these_pids.txt'
+; pid_file = '/tmp/create_bags_for_these_pids.txt'
 
 [bag]
 ; Type of compression to use on the Bag. Can be 'tgz', 'zip', or 'none'. Defaults to 'tgz'.
@@ -92,7 +92,7 @@ The `[objects] solr_query` setting can take any Solr query that is compatible wi
 * specify the `fl=PID` parameter, since they only need to return a list of PIDs
 * have a `rows` paramter with a very high value, such as 1000000, to ensure that your query returns all the PIDs that it finds (Solr's default is 10 rows)
 * have any [special characters](http://lucene.apache.org/core/4_5_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html?is-external=true#Escaping_Special_Characters) escaped with a backslash.
-* be URL encoded.
+* should not be URL encoded, since Guzzle does this for you.
 
 Some useful queries include:
 
@@ -112,17 +112,19 @@ A plugin is a simple PHP class file that modifies each Bag. To enable a plugin, 
 plugins[] = MyPlugin
 ```
 
-Two plugins that you might find useful are:
+Three plugins that you might find useful are:
 
 * AddCommonTags
   * Adds a `Internal-Sender-Identifier` tag to bagit-info.txt with the object's URL as its value
   * Adds a `Bagging-Date` tag to bagit-info.txt with the current date in yyyy-mm-dd format as its value
 * AddObjectProperties
   * Adds a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.)
+* AddChildrenPids
+  * Adds a JSON file to the Bag that contains the PIDs and sequence properties of the Islandora object's children
 
 Plugins are executed in the order in which they are registered in the .ini file.
 
-If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. A third plugin, AddObjectProperties, can be used to add a JSON file to the Bag that contains the Islandora object's properties (label, owner, list of datastreams, etc.).
+If you want to customize your Bags beyond what the options in the .ini file allow, you can use plugins. A plugin is a simple PHP class file. The abstract class plus two example plugins are available in the `src/plugins` directory. The plugins listed above provide additional examples to follow.
 
 If you want to write your own plugin, consult the examples, `BasicCustomBag.php` and `AdvancedCustomBag.php`, in `src/plugins`. Once you have written a plugin, do the following to use it:
 
@@ -142,7 +144,7 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 
 ## To do
 
-* Allow the creation of Bags for complex object such as books or newspaper issues.
+* Allow the creation of Bags for complex object such as books or newspaper issues (although we do have the AddChildrenPids plugin).
 * Provide a way to configure the Bag filename.
 * Add proper error handling and logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
