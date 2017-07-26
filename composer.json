@@ -9,6 +9,7 @@
     "require": {
         "guzzlehttp/guzzle": "~6.0",
         "scholarslab/bagit": "~0.2",
+        "monolog/monolog": "~1.13",
         "ralouphie/mimey": "*"
     }
 }

@@ -44,6 +44,9 @@ output_dir = '/tmp/bags'
 ; (and not '/tmp') since its contents are deleted after Bags are created.
 temp_dir = '/tmp/tmpbags';
 
+; Path to log file. Defaults to 'fetch_bags.log' in the same directory as 'fetch.php'.
+; path_to_log = "/path/to/log.txt'
+
 [objects]
 ; You can select which objects to create Bags for in two ways, 1) a Solr query or
 ; 2) a list of PIDs. Note that these two options are mutually exclusive.
@@ -151,7 +154,7 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 * Allow the creation of Bags for complex object such as books or newspaper issues that contain all children Bags.
   * The AddChildrenPids plugin only adds to the Bag a file listing all children, it doesn't add the children's content.
 * Provide a way to configure the Bag filename.
-* Add proper error handling and logging.
+* Add error handling and better logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
 ## License

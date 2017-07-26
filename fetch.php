@@ -3,6 +3,8 @@
 require_once 'vendor/autoload.php';
 require 'vendor/scholarslab/bagit/lib/bagit.php';
 
+use Monolog\Logger;
+
 if (file_exists(trim($argv[1]))) {
     $config = parse_ini_file(trim($argv[1]), true);
 } else {
@@ -16,6 +18,13 @@ $islandora_base_url = rtrim($config['general']['islandora_base_url'], '/');
 $config['bag']['compression'] = isset($config['bag']['compression']) ?
     $config['bag']['compression'] : 'tgz';
 
+$path_to_log = isset($config['general']['path_to_log']) ?
+    $config['general']['path_to_log'] : 'fetch_bags.log';
+$log = new Monolog\Logger('Islandora Fetch Bags');
+$log_stream_handler= new Monolog\Handler\StreamHandler($path_to_log, Logger::INFO);
+$log->pushHandler($log_stream_handler);
+$log->addInfo("fetch.php started exporting Bags from " . $islandora_base_url . " starting at ". date("F j, Y, g:i a"));
+
 $pids = array();
 if (isset($config['objects']['solr_query'])) {
     $solr_query = $config['objects']['solr_query'];
@@ -26,7 +35,6 @@ if (isset($config['objects']['pid_file'])) {
     $pids = get_pids_from_file($pid_file);
 }
 
-// Assemble each object URL and fetch datastream content.
 if (count($pids) == 0) {
     print "No objects to generate Bags for, exiting.\n";
     exit;
@@ -35,6 +43,8 @@ if (count($pids) == 0) {
 foreach ($pids as $pid) {
     describe_object($pid, $islandora_base_url);
 }
+
+$log->addInfo("fetch.php finished exporting Bags at ". date("F j, Y, g:i a"));
 
 /**
  * Gets the list of datastreams from Islandora's REST interface.
@@ -110,6 +120,7 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
  *   Array of file paths to the saved files.
  */
 function generate_bag($object_response_body, $bag_temp_dir, $files) {
+    global $log;
     global $output_dir;
     global $islandora_base_url;
     global $config;
@@ -153,7 +164,10 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
         $bag->package($bag_output_dir, $config['bag']['compression']);
         cleanup_temp_files($bag_output_dir);
     }
-    print "Bag for $object_url saved in $output_dir\n";
+
+    $message = "Bag for $object_url saved in $output_dir";
+    $log->addInfo($message);
+    print $message . "\n";
 
     cleanup_temp_files($bag_temp_dir);
 }
