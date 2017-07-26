@@ -131,7 +131,7 @@ Plugins are executed in the order in which they are registered in the .ini file.
 
 ### Writing plugins
 
-If you want to write your own plugin, consult the examples in `src/plugins`. A plugin is a simple PHP class file. The abstract class plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples to follow.
+A plugin is contained within a single PHP class file. The abstract class plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples to follow.
 
 Once you have written a plugin, do the following to use it:
 
@@ -139,7 +139,11 @@ Once you have written a plugin, do the following to use it:
 1. run composer's `dump-autoload` command so that your plugin's class file will be detected
 1. enable your plugin by registering its class name in the `[bag]` section of your .ini file, as illustrated above
 
-Within you plugin's `->execute()` method, you can use any of [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
+Some useful points relevant to writing plugins:
+
+* Within you plugin's `->execute()` method, you can use [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
+* Within your plugin's methods, you can access configuration values in `$this->config`, e.g., `$this->config['general']['temp_dir']`, including custom .ini values.
+* If you download or generate a file within your plugin that you want included in your Bags, save it in `$this->config['general']['temp_dir']` so it is cleaned up automatically after the Bag is generated.
 
 ## Maintainer
 

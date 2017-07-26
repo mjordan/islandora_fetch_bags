@@ -1,10 +1,18 @@
 <?php
 
+/**
+ * @file
+ * fetch.php, a utility for generating Bags via the Islandora
+ * REST interface.
+ *
+ * See the README.md file for more information.
+ */
+
 require_once 'vendor/autoload.php';
 require 'vendor/scholarslab/bagit/lib/bagit.php';
-
 use Monolog\Logger;
 
+// Read the .ini file.
 if (file_exists(trim($argv[1]))) {
     $config = parse_ini_file(trim($argv[1]), true);
 } else {
@@ -12,6 +20,9 @@ if (file_exists(trim($argv[1]))) {
     exit;
 }
 
+/**
+ * Set up configuration values and log file.
+ */
 $temp_dir = $config['general']['temp_dir'];
 $output_dir = $config['general']['output_dir'];
 $islandora_base_url = rtrim($config['general']['islandora_base_url'], '/');
@@ -25,6 +36,11 @@ $log_stream_handler= new Monolog\Handler\StreamHandler($path_to_log, Logger::INF
 $log->pushHandler($log_stream_handler);
 $log->addInfo("fetch.php started exporting Bags from " . $islandora_base_url . " starting at ". date("F j, Y, g:i a"));
 
+/**
+ * Get PIDs of objects to create Bags for, loop through
+ * the list, call Islandora's REST interface to get info
+ * on each object, and generate its Bag.
+ */
 $pids = array();
 if (isset($config['objects']['solr_query'])) {
     $solr_query = $config['objects']['solr_query'];
@@ -47,6 +63,10 @@ foreach ($pids as $pid) {
 $log->addInfo("fetch.php finished exporting Bags at ". date("F j, Y, g:i a"));
 
 /**
+ * Functions.
+ */
+
+/**
  * Gets the list of datastreams from Islandora's REST interface.
  *
  * @param string $pid
@@ -60,7 +80,7 @@ function describe_object($pid, $islandora_base_url) {
     $object_response = $client->request('GET', $object_url, [
        'headers' => [
             'Accept' => 'application/json',
-            // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
+            // 'X-Authorization-User' => $user . ':' . $token,
         ]
     ]);
 
@@ -96,7 +116,7 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
         $ds_url = $islandora_base_url . '/islandora/rest/v1/object/' . $raw_pid . '/datastream/' . $ds->dsid;
         $ds_response = $client->request('GET', $ds_url, [
             'headers' => [
-                // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
+                // 'X-Authorization-User' => $user . ':' . $token,
             ]
         ]);
 
@@ -180,10 +200,10 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
  */
 function cleanup_temp_files($dir) {
     $files = array_diff(scandir($dir), array('.','..'));
-        foreach ($files as $file) {
-            $child = $dir . DIRECTORY_SEPARATOR . $file;
-            is_dir($child) ? cleanup_temp_files($child) : unlink($child);
-        }
+    foreach ($files as $file) {
+        $child = $dir . DIRECTORY_SEPARATOR . $file;
+        is_dir($child) ? cleanup_temp_files($child) : unlink($child);
+    }
     rmdir($dir);
 }
 
@@ -206,7 +226,7 @@ function get_pids_from_solr($islandora_base_url, $solr_query) {
     $solr_response = $client->request('GET', $solr_url, [
            'headers' => [
                 'Accept' => 'application/json',
-                // 'X-Authorization-User' => $cmd['u'] . ':' . $cmd['t'],
+                // 'X-Authorization-User' => $user . ':' . $token,
             ]
     ]);
 
