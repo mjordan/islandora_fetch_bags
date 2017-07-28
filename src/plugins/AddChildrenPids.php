@@ -10,7 +10,7 @@ namespace ifb\plugins;
 /**
  * Defines AddObjectProperties class.
  */
-class AddChildrenPids extends AbstractIfbPlugin 
+class AddChildrenPids extends AbstractIfbPlugin
 {
     /**
      * Constructor.
@@ -36,7 +36,8 @@ class AddChildrenPids extends AbstractIfbPlugin
         if (count($children_pid_list)) {
             // Always save downloaded or written files to the temp directory so they are
             // cleaned up properly.
-            $bag_temp_dir = $this->config['general']['temp_dir'] . DIRECTORY_SEPARATOR . $pid_with_underscore;
+            $bag_name = get_bag_name($object_response_body->pid);
+            $bag_temp_dir = get_bag_temp_dir($bag_name);
             $children_pid_list_file_path = $bag_temp_dir . DIRECTORY_SEPARATOR . 'children.json';
             file_put_contents($children_pid_list_file_path, $children_pid_list);
 

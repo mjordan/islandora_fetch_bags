@@ -2,8 +2,7 @@
 
 /**
  * @file
- * fetch.php, a utility for generating Bags via the Islandora
- * REST interface.
+ * fetch.php, a utility for generating Bags via the Islandora REST interface.
  *
  * See the README.md file for more information.
  */
@@ -28,6 +27,10 @@ $output_dir = $config['general']['output_dir'];
 $islandora_base_url = rtrim($config['general']['islandora_base_url'], '/');
 $config['bag']['compression'] = isset($config['bag']['compression']) ?
     $config['bag']['compression'] : 'tgz';
+$name_template = isset($config['general']['name_template']) ?
+    $config['general']['name_template'] : '[PID]';
+$pid_separator = isset($config['general']['pid_separator']) ?
+    $config['general']['pid_separator'] : '_';
 
 $path_to_log = isset($config['general']['path_to_log']) ?
     $config['general']['path_to_log'] : 'fetch_bags.log';
@@ -55,6 +58,9 @@ if (count($pids) == 0) {
     print "No objects to generate Bags for, exiting.\n";
     exit;
 }
+
+@mkdir($temp_dir);
+@mkdir($output_dir);
 
 foreach ($pids as $pid) {
     describe_object($pid, $islandora_base_url);
@@ -97,7 +103,9 @@ function describe_object($pid, $islandora_base_url) {
  *   The site's base URL.
  */
 function fetch_datastreams($object_response_body, $islandora_base_url) {
-    global $temp_dir;
+    // global $temp_dir;
+    global $name_template;
+    global $pid_separator;
     $raw_pid = $object_response_body->pid;
     $datastreams = $object_response_body->datastreams;
 
@@ -107,9 +115,9 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
 
     $mimes = new \Mimey\MimeTypes($builder->getMapping());
 
-    $pid = preg_replace('/:/', '_', $raw_pid);
-    $bag_temp_dir = $temp_dir . DIRECTORY_SEPARATOR . $pid;
-    @mkdir($bag_temp_dir);
+    $bag_name = get_bag_name($raw_pid);
+    $bag_temp_dir = get_bag_temp_dir($bag_name);
+    mkdir($bag_temp_dir);
     $client = new GuzzleHttp\Client();
     $data_files = array();
     foreach ($datastreams as $ds) {
@@ -125,7 +133,8 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
         file_put_contents($file_path, $ds_response->getBody());
         $data_files[] = $file_path;
     }
-    generate_bag($object_response_body, $bag_temp_dir, $data_files);
+
+    generate_bag($object_response_body, $data_files);
 }
 
 /**
@@ -133,14 +142,13 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
  *
  * @param object $object_response_body
  *   The body of the REST request to describe the Islandora object.
- * @param string $bag_temp_dir
- *   The object-level temporary directory where
- *   fetched datastream files have been saved.
  * @param array $files
  *   Array of file paths to the saved files.
  */
-function generate_bag($object_response_body, $bag_temp_dir, $files) {
+function generate_bag($object_response_body, $files) {
     global $log;
+    global $name_template;
+    global $pid_separator;
     global $output_dir;
     global $islandora_base_url;
     global $config;
@@ -153,10 +161,9 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
         $bag_info[$tag] = trim($value);
     }
 
-    // @todo: PIDs can contain _, so we need to fix this.
-    $filesystem_safe_pid = preg_replace('/:/', '_', $pid);
+    $bag_name = get_bag_name($pid);
 
-    $bag_dir = $output_dir . DIRECTORY_SEPARATOR . $filesystem_safe_pid;
+    $bag_dir = $output_dir . DIRECTORY_SEPARATOR . $bag_name;
     $bag = new BagIt($bag_dir, true, true, true, $bag_info);
 
     foreach ($files as $file) {
@@ -179,7 +186,7 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
 
     $bag->update();
 
-    $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $pid;
+    $bag_output_dir = $output_dir . DIRECTORY_SEPARATOR . $bag_name;
     if ($config['bag']['compression'] == 'tgz' or $config['bag']['compression'] == 'zip') {
         $bag->package($bag_output_dir, $config['bag']['compression']);
         cleanup_temp_files($bag_output_dir);
@@ -189,7 +196,44 @@ function generate_bag($object_response_body, $bag_temp_dir, $files) {
     $log->addInfo($message);
     print $message . "\n";
 
+    $bag_temp_dir = get_bag_temp_dir($bag_name);
     cleanup_temp_files($bag_temp_dir);
+}
+
+/**
+ * Gets the Bag's name, which is the name of the directory where
+ * the Bag will be output to, or the name of the zip/tar file
+ * if compression is enabled.
+ *
+ * @param string $pid
+ *    The object's PID.
+ *
+ * @return string
+ *    The Bag's name.
+ */
+function get_bag_name($pid) {
+    global $name_template;
+    global $pid_separator;
+    $pid_for_bag_dir = preg_replace('/' . ':' .'/', $pid_separator, $pid);
+    $bag_name = preg_replace('/\[PID\]/', $pid_for_bag_dir, $name_template);
+    return $bag_name;
+}
+
+/**
+ * Gets the temporary directory path where the Bag's files
+ * are stored.
+ *
+ * @param string $bag_name
+ *   The Bag's name, which is the name of the directory where
+ *   the Bag will be output to, or the name of the zip/tar file
+ *   if compression is enabled.
+ *
+ * @return string
+ *    The full path to the temporary directory.
+ */
+function get_bag_temp_dir($bag_name) {
+    global $temp_dir;
+    return $temp_dir . DIRECTORY_SEPARATOR . $bag_name;
 }
 
 /**

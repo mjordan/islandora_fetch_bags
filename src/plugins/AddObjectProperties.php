@@ -10,7 +10,7 @@ namespace ifb\plugins;
 /**
  * Defines AddObjectProperties class.
  */
-class AddObjectProperties extends AbstractIfbPlugin 
+class AddObjectProperties extends AbstractIfbPlugin
 {
     /**
      * Constructor.
@@ -31,11 +31,12 @@ class AddObjectProperties extends AbstractIfbPlugin
     public function execute($bag, $object_response_body)
     {
         $object_properties = json_encode($object_response_body);
-        $pid = preg_replace('/:/', '_', $object_response_body->pid);
+        $pid = $object_response_body->pid;
 
         // Always save downloaded or written files to the temp directory so they are
         // cleaned up properly.
-        $bag_temp_dir = $this->config['general']['temp_dir'] . DIRECTORY_SEPARATOR . $pid;
+        $bag_name = get_bag_name($pid);
+        $bag_temp_dir = get_bag_temp_dir($bag_name);
         $object_properties_file_path = $bag_temp_dir . DIRECTORY_SEPARATOR . 'object_properties.json';
         file_put_contents($object_properties_file_path, $object_properties);
 

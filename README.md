@@ -44,6 +44,18 @@ output_dir = '/tmp/bags'
 ; (and not '/tmp') since its contents are deleted after Bags are created.
 temp_dir = '/tmp/tmpbags';
 
+; This tool allows users to create a template for the names of their Bags using two
+; configuration options, 'name_template' and 'pid_separator'. The generation of the Bag
+; names is a two-step process. First, the : in the PID is replaced with another string,
+; and second, the output of this replacement is combined with a name template.
+; In the template, the special placeholder [PID] will be replaced with the modified PID.
+; For example, if the pid_separator is '_', the PID 'islandora:100' will be converted to
+; 'islandora_100'. Then, if the name_pattern is 'mybag-[PID], the Bag name will become
+; 'mybag-islandora_100'. name_pattern defaults to nothing, and pid_separator defaults to
+; '_', resulting in default Bag names like 'islandora_100'.
+; name_template = mybag-[PID]
+; pid_separator = %3A 
+
 ; Path to log file. Defaults to 'fetch_bags.log' in the same directory as 'fetch.php'.
 ; path_to_log = "/path/to/log.txt'
 
@@ -157,7 +169,6 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 
 * Allow the creation of Bags for complex object such as books or newspaper issues that contain all children Bags.
   * The AddChildrenPids plugin only adds to the Bag a file listing all children, it doesn't add the children's content.
-* Provide a way to configure the Bag filename.
 * Add error handling and better logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
