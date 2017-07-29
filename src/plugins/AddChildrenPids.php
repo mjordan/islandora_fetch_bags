@@ -25,15 +25,15 @@ class AddChildrenPids extends AbstractIfbPlugin
 
     /**
      * Get object's children PIDs and sequence info, save them to a JSON
-     * file in the temporary directory, then add that file to the Bag.
+     * file in the temporary directory, then add that file to the Bag. If
+     * and object has no children, no file is added to the Bag.
      */
     public function execute($bag, $object_response_body)
     {
         $pid_with_underscore = preg_replace('/:/', '_', $object_response_body->pid);
         $children_pid_list = $this->getChildren($object_response_body->pid, $object_response_body->models);
-        $children_pid_list = json_encode($children_pid_list);
-
-        if (count($children_pid_list)) {
+        if (count($children_pid_list) > 0) {
+            $children_pid_list = json_encode($children_pid_list);
             // Always save downloaded or written files to the temp directory so they are
             // cleaned up properly.
             $bag_name = get_bag_name($object_response_body->pid);
@@ -101,7 +101,11 @@ class AddChildrenPids extends AbstractIfbPlugin
         $solr_response_body = $solr_response->getBody();
         $solr_results = json_decode($solr_response_body);
         $docs = $solr_results->response->docs;
-
-        return $docs;
+        if (count($docs) > 0) {
+            return $docs;
+        }
+        else {
+            return array();
+        }
     }
 }

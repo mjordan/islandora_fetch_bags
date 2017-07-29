@@ -165,8 +165,6 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
  */
 function generate_bag($object_response_body, $files) {
     global $log;
-    global $name_template;
-    global $pid_separator;
     global $output_dir;
     global $islandora_base_url;
     global $config;
