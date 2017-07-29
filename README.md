@@ -42,8 +42,8 @@ islandora_base_url = 'http://islandora.example.com';
 output_dir = '/tmp/bags'
 
 ; Directory for saving fetched files temporarily. Must exist.
-; Important: Always use a specific directory for 'temp_dir'
-; (and not '/tmp') since its contents are deleted after Bags are created.
+; Important: Always use a specific directory for 'temp_dir' (and not
+; '/tmp' or 'c:\temp') since its contents are deleted after Bags are created.
 temp_dir = '/tmp/tmpbags';
 
 ; This tool allows users to create a template for the names of their Bags using two
@@ -67,10 +67,10 @@ temp_dir = '/tmp/tmpbags';
 ; 2) a list of PIDs. Note that these two options are mutually exclusive.
 
 ; Use 'solr_query' if you want to get a list of PIDs from your Islandora instance's Solr
-; index. The query in this example queries for objects whose namespace is 'hiv', with a
+; index. The query in this example queries for objects whose namespace is 'foo', with a
 ; limit of 20. If you want to retrieve _all_ the PIDs possible, set the 'rows' parameter to
 ; a ridiculously high value like 1000000.
-solr_query = "PID:hiv\:*?fl=PID&rows=20"
+solr_query = "PID:foo\:*?fl=PID&rows=20"
 
 ; Use 'pid_file' if you have a specific list of PIDs. The 'pid_file' setting defines
 ; the full path to a file listing the PIDs, one PID per row. // and # can be used to
@@ -94,8 +94,8 @@ plugins[] = AddCommonTags
 ; must be literal strings. If you want to generate values based on properties of each
 ; object, you will need to write a plugin. Consult the AdvancedCustomBag.php plugin
 ; for an example of how to do that.
-; tags[] = 'Contact-Email:bag-creators@sfu.ca'
-; tags[] = 'Source-Organization:Simon Fraser University Library'
+; tags[] = 'Contact-Email:bag-creators@example.com'
+; tags[] = 'Source-Organization:Example Corporation'
 ```
 
 Once you have your .ini file, run the `fetch.php` command, providing the name of your .ini file as its argument:
@@ -109,7 +109,7 @@ When the script finishes, your Bags will be saved in the directory specified in 
 The `[objects] solr_query` setting can take any Solr query that is compatible with Islandora REST's `solr` endpoint (which is pretty much any Solr query). Queries should:
 
 * specify the `fl=PID` parameter, since they only need to return a list of PIDs
-* have a `rows` paramter with a very high value, such as 1000000, to ensure that your query returns all the PIDs that it finds (Solr's default is 10 rows)
+* have a `rows` parameter with a very high value, such as 1000000, to ensure that your query returns all the PIDs that it finds (Solr's default is 10 rows)
 * have any [special characters](http://lucene.apache.org/core/4_5_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html?is-external=true#Escaping_Special_Characters) escaped with a backslash
 * should not be URL encoded, since the REST client does this automatically.
 
@@ -126,7 +126,7 @@ Some useful queries include:
 
 ### Using plugins
 
-A plugin is a simple PHP class file that modifies each Bag. To enable a plugin, add its name to the `[bag] plugins[]` section of your .ini file, like this:
+Plugins provide a way to customize or alter Bags. To enable a plugin, add its name to the `[bag] plugins[]` section of your .ini file, like this:
 
 ```
 [bag]
@@ -147,7 +147,7 @@ Plugins are executed in the order in which they are registered in the .ini file.
 
 ### Writing plugins
 
-A plugin is contained within a single PHP class file. The abstract class plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples.
+A plugin is contained within a single PHP class file. The abstract class `PluginAbstractClass.php` plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples.
 
 Once you have written a plugin, do the following to use it:
 
@@ -174,7 +174,7 @@ Bug reports, use cases and suggestions are welcome. So are plugins! If you want 
 
 * Allow the creation of Bags for complex object such as books or newspaper issues that contain all children Bags.
   * The AddChildrenPids plugin only adds to the Bag a file listing all children, it doesn't add the children's content.
-* Add error handling and better logging.
+* Add more error handling and logging.
 * Add support for access to the REST interface controlled by [Islandora REST Authen](https://github.com/mjordan/islandora_rest_authen)
 
 ## License

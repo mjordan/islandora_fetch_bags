@@ -10,6 +10,11 @@
 require_once 'vendor/autoload.php';
 require 'vendor/scholarslab/bagit/lib/bagit.php';
 use Monolog\Logger;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 // Read the .ini file.
 if (file_exists(trim($argv[1]))) {
@@ -81,14 +86,26 @@ $log->addInfo("fetch.php finished exporting Bags at ". date("F j, Y, g:i a"));
  *   The site's base URL.
  */
 function describe_object($pid, $islandora_base_url) {
-  $object_url = $islandora_base_url . '/islandora/rest/v1/object/' . $pid;
-  $client = new GuzzleHttp\Client();
-    $object_response = $client->request('GET', $object_url, [
-       'headers' => [
-            'Accept' => 'application/json',
-            // 'X-Authorization-User' => $user . ':' . $token,
-        ]
-    ]);
+    $object_url = $islandora_base_url . '/islandora/rest/v1/object/' . $pid;
+
+    try {
+        $client = new GuzzleHttp\Client();
+        $object_response = $client->request('GET', $object_url, [
+           'headers' => [
+               'Accept' => 'application/json',
+                // 'X-Authorization-User' => $user . ':' . $token,
+           ]
+        ]);
+     } catch (Exception $e) {
+        if ($e instanceof RequestException or $e instanceof ClientException or $e instanceof ServerException ) {
+            $log->addError(Psr7\str($e->getRequest()));
+            if ($e->hasResponse()) {
+                $log->addError(Psr7\str($e->getResponse()));
+                print Psr7\str($e->getResponse()) . "\n";
+            }
+            exit;
+        }
+    }
 
     $object_response_body = json_decode($object_response->getBody());
     fetch_datastreams($object_response_body, $islandora_base_url);
