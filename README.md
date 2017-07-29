@@ -32,11 +32,11 @@ This script:
 To use it, create an .ini file like this one:
 
 ```
-; Sample .ini file for the Islandora Fetch Bags tool
+; Sample .ini file for the Islandora Fetch Bags tool.
 
 [general]
 ; Your Islandora instance's base URL. Do not include the trailing /.
-islandora_base_url = 'http://digital.lib.sfu.ca';
+islandora_base_url = 'http://islandora.example.com';
 
 ; Where you want your Bags to be saved. Must exist.
 output_dir = '/tmp/bags'
@@ -48,13 +48,14 @@ temp_dir = '/tmp/tmpbags';
 
 ; This tool allows users to create a template for the names of their Bags using two
 ; configuration options, 'name_template' and 'pid_separator'. The generation of the Bag
-; names is a two-step process. First, the : in the PID is replaced with another string,
-; and second, the output of this replacement is combined with a name template.
-; In the template, the special placeholder [PID] will be replaced with the modified PID.
-; For example, if the pid_separator is '_', the PID 'islandora:100' will be converted to
+; names is a two-step process. First, the ':' in the PID is replaced with another string,
+; and second, the output of this replacement is combined with a name template.In the
+: template, the special placeholder [PID] will be replaced with the modified PID. For
+; example, if the pid_separator is '_', the PID 'islandora:100' will be converted to
 ; 'islandora_100'. Then, if the name_pattern is 'mybag-[PID], the Bag name will become
 ; 'mybag-islandora_100'. name_pattern defaults to nothing, and pid_separator defaults to
 ; '_', resulting in default Bag names like 'islandora_100'.
+
 ; name_template = mybag-[PID]
 ; pid_separator = %3A 
 
@@ -89,11 +90,12 @@ plugins[] = AddCommonTags
 ; fetch[] = "http://example.com/contact.htm"
 
 [bag-info]
-; Tags defined in this section are added to the bag-info.txt file in each Bag. Values must
-; be literal strings. If you want to generate values based on properties of the object, you
-; will need to write a plugin.
-tags[] = 'Contact-Email:bag-creators@sfu.ca'
-tags[] = 'Source-Organization:Simon Fraser University Library'
+; Tags defined in this section are added to the bag-info.txt file in all Bags. Values
+; must be literal strings. If you want to generate values based on properties of each
+; object, you will need to write a plugin. Consult the AdvancedCustomBag.php plugin
+; for an example of how to do that.
+; tags[] = 'Contact-Email:bag-creators@sfu.ca'
+; tags[] = 'Source-Organization:Simon Fraser University Library'
 ```
 
 Once you have your .ini file, run the `fetch.php` command, providing the name of your .ini file as its argument:
