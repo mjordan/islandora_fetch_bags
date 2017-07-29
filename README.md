@@ -14,6 +14,8 @@ The standard [Islandora BagIt](https://github.com/Islandora/islandora_bagit) mod
 
 ## Installation
 
+On the system where the script is run:
+
 1. `git clone https://github.com/mjordan/islandora_fetch_bags.git`
 1. `cd islandora_fetch_bags`
 1. `php composer.phar install` (or equivalent on your system, e.g., `./composer install`)
@@ -113,16 +115,16 @@ Some useful queries include:
 
 * `PID:foo\:*?fl=PID&rows=1000000`
   * Retrieves all objects with a namespace of "foo"
-* `RELS_EXT_isMemberOfCollection_uri_ms:info\:fedora/islandora\:sp_basic_image_collection`
+* `RELS_EXT_isMemberOfCollection_uri_ms:*islandora\:sp_basic_imamge_collection?fl=PID&rows=1000000`
   * Retrieves all objects that are members of the islandora:sp_basic_image_collection
-* `fgs_lastModifiedDate_dt:[2017-07-21T00:00:00.000Z TO *]`
-  * Retrieves all objects modified since 2017-07-12 UTC.
+* `fgs_lastModifiedDate_dt:[2017-05-21T00:00:00.000Z TO *]?fl=PID&rows=100`
+  * Retrieves the first 100 objects modified since midnight UTC on 2017-05-12
 
 ## Plugins
 
 ### Using plugins
 
-A plugin is a simple PHP class file that modifies each Bag. To enable a plugin, add its name to the `[bag]` section of your .ini file, like this:
+A plugin is a simple PHP class file that modifies each Bag. To enable a plugin, add its name to the `[bag] plugins[]` section of your .ini file, like this:
 
 ```
 [bag]
@@ -143,7 +145,7 @@ Plugins are executed in the order in which they are registered in the .ini file.
 
 ### Writing plugins
 
-A plugin is contained within a single PHP class file. The abstract class plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples to follow.
+A plugin is contained within a single PHP class file. The abstract class plus two example plugin class files (`BasicCustomBag.php` and `AdvancedCustomBag.php`) are available in the `src/plugins` directory. The plugins listed above provide additional examples.
 
 Once you have written a plugin, do the following to use it:
 
@@ -153,6 +155,7 @@ Once you have written a plugin, do the following to use it:
 
 Some useful points relevant to writing plugins:
 
+* Plugins extend the abstract class `src/plugins/PluginAbstractClass.php`.
 * Within you plugin's `->execute()` method, you can use [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
 * Within your plugin's methods, you can access configuration values in `$this->config`, e.g., `$this->config['general']['temp_dir']`, including custom .ini values.
 * If you download or generate a file within your plugin that you want included in your Bags, save it in `$this->config['general']['temp_dir']` so it is cleaned up automatically after the Bag is generated.

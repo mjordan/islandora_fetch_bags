@@ -112,6 +112,7 @@ function fetch_datastreams($object_response_body, $islandora_base_url) {
     // Add some custom mimetype -> extension mappings.
     $builder = \Mimey\MimeMappingBuilder::create();
     $builder->add('text/xml', 'xml');
+    $builder->add('image/jp2', 'jp2');
 
     $mimes = new \Mimey\MimeTypes($builder->getMapping());
 
