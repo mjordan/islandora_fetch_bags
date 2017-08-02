@@ -21,6 +21,14 @@ abstract class AbstractIfbPlugin
     public function __construct($config)
     {
         $this->config = $config;
+
+        $this->path_to_log = isset($config['general']['path_to_log']) ?
+            $config['general']['path_to_log'] : 'fetch_bags.log';
+
+        $log = new \Monolog\Logger('Islandora Fetch Bags');
+        $log_stream_handler= new \Monolog\Handler\StreamHandler($this->path_to_log, \Monolog\Logger::INFO);
+        $log->pushHandler($log_stream_handler);
+        $this->log = $log;
     }
 
     /**

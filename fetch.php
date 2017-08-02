@@ -42,7 +42,7 @@ $path_to_log = isset($config['general']['path_to_log']) ?
 $log = new Monolog\Logger('Islandora Fetch Bags');
 $log_stream_handler= new Monolog\Handler\StreamHandler($path_to_log, Logger::INFO);
 $log->pushHandler($log_stream_handler);
-$log->addInfo("fetch.php started exporting Bags from " . $islandora_base_url . " starting at ". date("F j, Y, g:i a"));
+$log->addInfo("fetch.php started generating Bags from " . $islandora_base_url . " starting at ". date("F j, Y, g:i a"));
 
 /**
  * Get PIDs of objects to create Bags for, loop through
@@ -120,7 +120,7 @@ function describe_object($pid, $islandora_base_url) {
  *   The site's base URL.
  */
 function fetch_datastreams($object_response_body, $islandora_base_url) {
-    // global $temp_dir;
+    global $log;
     global $name_template;
     global $pid_separator;
     $raw_pid = $object_response_body->pid;

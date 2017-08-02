@@ -116,11 +116,11 @@ The `[objects] solr_query` setting can take any Solr query that is compatible wi
 Some useful queries include:
 
 * `PID:foo\:*?fl=PID&rows=1000000`
-  * Retrieves all objects with a namespace of "foo"
-* `RELS_EXT_isMemberOfCollection_uri_ms:*islandora\:sp_basic_imamge_collection?fl=PID&rows=1000000`
-  * Retrieves all objects that are members of the islandora:sp_basic_image_collection
+  * Retrieves all objects with a namespace of "foo".
+* `RELS_EXT_isMemberOfCollection_uri_ms:*islandora\:sp_basic_image_collection?fl=PID&rows=1000000`
+  * Retrieves all objects that are members of the islandora:sp_basic_image_collection.
 * `fgs_lastModifiedDate_dt:[2017-05-21T00:00:00.000Z TO *]?fl=PID&rows=100`
-  * Retrieves the first 100 objects modified since midnight UTC on 2017-05-12
+  * Retrieves the first 100 objects modified since midnight UTC on 2017-05-12. Date must be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
 
 ## Plugins
 
@@ -160,6 +160,7 @@ Some useful points relevant to writing plugins:
 * Plugins extend the abstract class `src/plugins/PluginAbstractClass.php`.
 * Within you plugin's `->execute()` method, you can use [BagIt PHP](https://github.com/scholarslab/BagItPHP)'s methods for manipulating your Bags, but you should not use its `->update()` or `->package()` methods, since these are called by the main `fetch.php` script after all plugins are executed.
 * Within your plugin's methods, you can access configuration values in `$this->config`, e.g., `$this->config['general']['temp_dir']`, including custom .ini values.
+* Within plugins, you can write entries to the Monolog logger by using `$this->log`.
 * If you download or generate a file within your plugin that you want included in your Bags, save it in `$this->config['general']['temp_dir']` so it is cleaned up automatically after the Bag is generated.
 
 ## Maintainer
